@@ -1,78 +1,84 @@
 # Product Requirements Document (PRD)
 
-<!-- Fuente de verdad sobre qué construimos y por qué.
-     Actualizar este archivo cuando cambie el alcance, las funcionalidades o el usuario objetivo.
-     Si algo se mueve a "fuera de alcance", no borrar: mover a la sección correspondiente. -->
+## Producto
 
----
-
-## Resumen ejecutivo
-
-<!-- 2-3 párrafos que expliquen el producto a alguien que no lo conoce.
-     Qué es, para quién, por qué existe ahora. -->
+**Nombre:** Presupuesto Familiar  
+**Descripción:** App web local para gestionar el presupuesto y la contabilidad del hogar de Robert y Marta.  
+**Estado:** En desarrollo — v1.0
 
 ---
 
 ## Problema que resuelve
 
-<!-- Describir el problema desde la perspectiva del usuario, no desde la solución técnica. -->
+Robert y Marta son dos funcionarios de la AEAT con 14 pagas al año, múltiples cuentas bancarias y gastos significativos vinculados al tenis de su hija Lucía (~2.400€/mes en entrenador). Necesitan una herramienta para:
+- Importar movimientos reales desde Google Sheets (CaixaBank y Santander)
+- Ver ingresos vs gastos mensuales frente a presupuesto definido
+- Controlar el gasto de tenis de Lucía por separado
+- Identificar visualmente los meses de paga extra (junio y diciembre)
 
 ---
 
-## Usuario objetivo
+## Usuarios
 
-<!-- Describir quién es el usuario principal.
-     Si hay varios perfiles de usuario, describir cada uno por separado.
-     Incluir persona si se ha definido:
-     - Nombre ficticio
-     - Edad, contexto
-     - Motivación principal
-     - Frustración principal que este producto resuelve -->
+- **Robert** — gestión principal de la app, importa sheets, define presupuestos
+- **Marta** — consulta resúmenes, añade movimientos Revolut
 
 ---
 
-## Funcionalidades core (MoSCoW)
+## Cuentas bancarias
 
-<!-- Priorizar con:
-     - MUST: imprescindible para el MVP
-     - SHOULD: importante pero no bloqueante
-     - COULD: deseable si hay tiempo
-     - WON'T: explícitamente fuera de alcance en esta versión -->
+| Cuenta | Fuente | Notas |
+|--------|--------|-------|
+| CaixaBank | Google Sheet (import manual) | Nómina Robert, MetLife, entrenador Lucía |
+| Santander | Google Sheet (import manual) | Nómina Marta, gastos fijos domiciliados |
+| Revolut | Entrada manual en app | Gastos hormiga Marta |
+| Kraken | Solo línea de gasto | Inversión crypto (interno no entra) |
 
-### MUST
-- <!-- ... -->
-
-### SHOULD
-- <!-- ... -->
-
-### COULD
-- <!-- ... -->
-
-### WON'T (esta versión)
-- <!-- ... -->
+**IDs de Sheets:**
+- CaixaBank: `154ovBGpaMOwoLAKN0wVHc12Ebr72t9LtzjHhjvy-oeM`
+- Santander: `1KfGcbeJYaoxJHfAwZuqEHflYcZsX1zfnUVowopS9cPk`
 
 ---
 
-## Flujos de usuario principales
+## Funcionalidades — v1.0
 
-<!-- Describir narrativamente los flujos más importantes.
-     No hace falta diagramas aquí (van en architecture.md si se necesitan).
-     Ejemplo:
-     
-     **Flujo de registro:**
-     El usuario llega a la landing, hace clic en "Crear cuenta", introduce email y contraseña,
-     recibe email de confirmación, confirma y accede al dashboard vacío. -->
-
----
-
-## Requisitos no funcionales
-
-<!-- Rendimiento, accesibilidad, SEO, internacionalización, seguridad, etc.
-     Solo los que sean relevantes para este proyecto. -->
+1. **Importar desde Sheets** — botón manual, deduplicación automática
+2. **Entrada manual Revolut** — formulario simple
+3. **Resumen mensual** — ingresos / gastos / balance con gráficas
+4. **Presupuesto definible** — por categoría y mes, con barra de progreso
+5. **Control de cuentas** — saldo actual + movimientos por cuenta
+6. **Vista Tenis Lucía** — total mensual + anual + desglose por concepto
+7. **Distinción paga extra** — badge visual en junio y diciembre
+8. **Exportar CSV** — compatible con Excel (UTF-8 BOM)
+9. **Base de datos persistente** — SQLite local, no se pierde al cerrar
 
 ---
 
-## Fuera de alcance (explícito)
+## Categorías
 
-<!-- Lista de cosas que se han discutido y decidido NO incluir.
-     Tenerlas escritas evita reabrir decisiones ya tomadas. -->
+### Ingresos
+NOMINA ROBERT, NOMINA MARTA, RETORNO SEGURO AXA, INGRESO MUFACE, BIZUM recibido, INGRESO AHORROS
+
+### Gastos Fijos
+SEGURO SALUD AXA, PRESTAMO COCHE Cetelem, TELEFONO VODAFONE, SEGURO LUCIA Mapfre, ONG CRUZ ROJA, ONG ACNUR, DEPURADOR AGUA, COMUNIDAD PROPIETARIOS, LAIETANIA, Impuestos (IVTM, IBI, basuras), SEGURO COCHE AXA, METLIFE, AHORRO LUCIA, COMUNIDAD PARKING, AGUAS MATARO
+
+### Tenis Lucía (categoría especial)
+ENTRENADOR LUCIA (Roydonces/JC Ferrero), COMIDAS TENIS, FISIO LUCIA, EQUIPAMIENTO TENIS, DESPLAZAMIENTOS TENIS
+
+### Gastos Variables
+LUZ ENDESA, GAS ENDESA, Alimentación, Farmacia/Salud, Transporte/Combustible, Ropa/Calzado, Hogar
+
+### Discrecional
+SIATSHU, Restaurantes/Ocio, Regalos, Viajes, Suscripciones, BIZUM enviados
+
+### Ahorro / Inversión
+TRANSFERENCIA REVOLUT, AHORRO ING, GASTOS LUCIA, TRANSFERENCIA KRAKEN
+
+---
+
+## Fuera de alcance
+
+- Movimientos internos de Kraken (contabilidad crypto separada)
+- Datos anteriores a enero 2026
+- App móvil
+- Multi-usuario / autenticación

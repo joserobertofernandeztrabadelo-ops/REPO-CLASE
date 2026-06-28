@@ -1,7 +1,67 @@
 # Modelo de datos
 
-<!-- Actualizar este archivo cada vez que se añada, modifique o elimine una tabla o relación.
-     El agente de codificación debe consultar este archivo antes de hacer cualquier migración. -->
+Base de datos: SQLite · ORM: SQLAlchemy
+
+---
+
+## Tabla: `accounts`
+
+| Campo | Tipo | Notas |
+|-------|------|-------|
+| id | INTEGER PK | autoincrement |
+| code | VARCHAR UNIQUE | `caixabank` / `santander` / `revolut` |
+| name | VARCHAR | Nombre para mostrar |
+| balance | FLOAT | Último saldo conocido |
+| last_updated | DATETIME | Fecha del último import |
+
+---
+
+## Tabla: `movements`
+
+| Campo | Tipo | Notas |
+|-------|------|-------|
+| id | INTEGER PK | autoincrement |
+| account_id | FK → accounts.id | |
+| date | DATE INDEXED | Fecha operación |
+| value_date | DATE | Fecha valor (puede ser null) |
+| description | VARCHAR | Descripción del banco |
+| concepto | VARCHAR | Etiqueta manual (columna CONCEPTO de la sheet) |
+| category | VARCHAR INDEXED | Categoría mapeada (ver categories.py) |
+| amount | FLOAT | Positivo = ingreso, negativo = gasto |
+| balance_after | FLOAT | Saldo tras la operación |
+| notes | VARCHAR | Notas manuales |
+| is_manual | BOOLEAN | True = entrada manual (Revolut) |
+| dedup_hash | VARCHAR UNIQUE | MD5(account\|date\|amount\|description[:80]) |
+| import_batch | VARCHAR | ID del lote de importación |
+| created_at | DATETIME | |
+
+---
+
+## Tabla: `budgets`
+
+| Campo | Tipo | Notas |
+|-------|------|-------|
+| id | INTEGER PK | |
+| year | INTEGER | |
+| month | INTEGER | |
+| category | VARCHAR | Debe existir en categories.py |
+| amount | FLOAT | Presupuesto para el mes |
+
+Constraint único: `(year, month, category)`
+
+---
+
+## Categorías (definidas en `app/categories.py`)
+
+| Categoría | Color | Es ingreso |
+|-----------|-------|-----------|
+| Ingresos | #10b981 | Sí |
+| Gastos Fijos | #f59e0b | No |
+| Tenis Lucía | #8b5cf6 | No |
+| Gastos Variables | #ef4444 | No |
+| Discrecional | #f97316 | No |
+| Ahorro/Inversión | #3b82f6 | No |
+| Sin categoría | #6b7280 | No |
 
 ---
 
