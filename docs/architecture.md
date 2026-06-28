@@ -1,104 +1,94 @@
 # Arquitectura técnica
 
-<!-- Documento vivo. Actualizar cada vez que cambie el stack, la estructura de carpetas
-     o cualquier decisión técnica relevante.
-     Los cambios deben registrarse también en changelog/. -->
+## Stack
 
----
+| Capa | Tecnología |
+|------|------------|
+| Backend | Python 3.11+ · FastAPI |
+| Base de datos | SQLite (SQLAlchemy ORM) |
+| Frontend | HTML + Tailwind CSS (CDN) + Alpine.js (CDN) + Chart.js (CDN) |
+| Google Sheets | gspread + google-auth-oauthlib (OAuth 2.0) |
+| Servidor | uvicorn |
+| Gestor de paquetes | pip + venv |
 
-## Stack seleccionado
-
-<!-- Lista el stack con justificación breve de cada decisión.
-     Ejemplo:
-     - **Next.js 14 (App Router):** Server Components para reducir bundle, mejor SEO.
-     - **Supabase:** Base de datos + Auth + Storage en un solo servicio, bien integrado con Next.js.
-     - **Tailwind CSS + shadcn/ui:** Velocidad de desarrollo sin sacrificar personalización.
-     - **Vercel:** Despliegue zero-config para Next.js, previews por rama. -->
-
-| Capa | Tecnología | Justificación |
-|------|-----------|---------------|
-| Framework | <!-- --> | <!-- --> |
-| Base de datos | <!-- --> | <!-- --> |
-| Autenticación | <!-- --> | <!-- --> |
-| Estilos | <!-- --> | <!-- --> |
-| Despliegue | <!-- --> | <!-- --> |
-
----
-
-## Diagrama de componentes
-
-<!-- Diagrama en Mermaid que muestre cómo interactúan los componentes principales.
-     Ejemplo:
-     ```mermaid
-     graph TD
-       Client[Navegador] --> NextJS[Next.js App]
-       NextJS --> Supabase[Supabase API]
-       Supabase --> DB[(PostgreSQL)]
-       Supabase --> Storage[Storage]
-       NextJS --> Resend[Resend API]
-     ```
--->
-
-```mermaid
-graph TD
-  A[Reemplaza este diagrama con el real]
-```
+No hay build step. El frontend son archivos estáticos servidos por FastAPI.
 
 ---
 
 ## Estructura de carpetas
 
-<!-- Documenta la estructura real del proyecto con una línea de descripción por carpeta.
-     Ejemplo:
-     ```
-     src/
-     ├── app/              → Rutas (App Router de Next.js)
-     │   ├── (auth)/       → Rutas protegidas por autenticación
-     │   └── api/          → Route handlers
-     ├── components/
-     │   ├── ui/           → Componentes base (shadcn/ui)
-     │   └── [feature]/    → Componentes específicos de cada feature
-     ├── lib/
-     │   ├── supabase/     → Cliente Supabase y helpers
-     │   └── utils/        → Funciones utilitarias
-     ├── hooks/            → Custom hooks de React
-     └── types/            → Tipos TypeScript compartidos
-     ``` -->
+```
+finanzas/
+├── app/
+│   ├── main.py              # FastAPI app, CORS, routes, static files
+│   ├── database.py          # SQLAlchemy engine + session + Base
+│   ├── models.py            # Account, Movement, Budget
+│   ├── categories.py        # Mapeo CONCEPTO → categoría, metadatos
+│   ├── routers/
+│   │   ├── movements.py     # CRUD, summary, tennis endpoints
+│   │   ├── accounts.py      # Account list + movements por cuenta
+│   │   ├── budget.py        # Budget CRUD por mes/categoría
+│   │   ├── sheets.py        # Import desde Google Sheets
+│   │   └── export.py        # CSV download
+│   └── services/
+│       └── google_sheets.py # gspread client, parsers CaixaBank/Santander
+├── static/
+│   ├── index.html           # SPA con Alpine.js
+│   └── app.js               # Estado, llamadas API, charts
+├── data/                    # SQLite DB (gitignored)
+│   └── finanzas.db
+├── auth.py                  # Setup OAuth Google (ejecutar 1 vez)
+├── credentials.json         # OAuth client secret (gitignored)
+├── token.json               # OAuth token (gitignored)
+├── requirements.txt
+└── start.sh                 # Arranque con venv
+```
 
 ---
 
-## Estrategia de autenticación
+## API endpoints
 
-<!-- Explica cómo funciona la autenticación.
-     Qué proveedor, qué flujo (magic link, OAuth, password), cómo se gestiona la sesión,
-     cómo se protegen las rutas. -->
+### Movimientos
+- `GET /api/movements/` — lista filtrable (year, month, account, category)
+- `POST /api/movements/` — crear movimiento manual (Revolut)
+- `PATCH /api/movements/{id}/category` — cambiar categoría
+- `DELETE /api/movements/{id}` — borrar movimiento manual
+- `GET /api/movements/summary/{year}/{month}` — totales y desglose por categoría
+- `GET /api/movements/tennis/{year}/{month}` — desglose Tenis Lucía
+
+### Cuentas
+- `GET /api/accounts/` — lista con saldos
+- `GET /api/accounts/{code}/movements` — movimientos de una cuenta
+
+### Presupuesto
+- `GET /api/budget/{year}/{month}` — presupuesto del mes
+- `POST /api/budget/` — crear/actualizar entrada de presupuesto
+- `DELETE /api/budget/{year}/{month}/{category}` — eliminar entrada
+
+### Importación
+- `POST /api/import/sheets` — importa CaixaBank + Santander desde Google Sheets
+- `GET /api/import/status` — estado de autenticación Google
+
+### Exportación
+- `GET /api/export/csv?year=&month=` — descarga CSV del mes
+
+### Misc
+- `GET /api/categories` — lista de categorías con metadatos (color, icon)
 
 ---
 
-## Integraciones externas
+## Modelo de datos
 
-<!-- Lista de servicios de terceros con descripción de para qué se usan y cómo se integran.
-     Ejemplo:
-     - **Resend:** Envío de emails transaccionales. Se llama desde server actions.
-     - **Stripe:** Pagos. Webhooks procesados en /api/webhooks/stripe. -->
-
----
-
-## Estrategia de despliegue
-
-<!-- Describe el flujo desde desarrollo hasta producción.
-     Ramas, entornos (local / staging / producción), CI/CD si existe, variables de entorno por entorno. -->
+Ver `docs/data-model.md`
 
 ---
 
 ## Decisiones técnicas relevantes
 
-<!-- Registro de decisiones arquitectónicas importantes con su razonamiento.
-     Útil para no repetir debates ya resueltos.
-     Formato sugerido:
-     
-     ### [Fecha] — [Título de la decisión]
-     **Contexto:** por qué surgió la decisión
-     **Opciones consideradas:** qué alternativas se evaluaron
-     **Decisión:** qué se eligió
-     **Consecuencias:** qué implica a futuro -->
+**Deduplicación de movimientos**: hash MD5 de `account|date|amount|description[:80]`. Permite reimportar los mismos sheets sin duplicar.
+
+**OAuth Google**: token almacenado en `token.json` local. El usuario ejecuta `python auth.py` una vez; después el servidor refresca el token automáticamente.
+
+**Sin build step**: el frontend usa CDN (Tailwind, Alpine.js, Chart.js). Simplicidad máxima para una app personal local.
+
+**Ejecución local**: la app corre en `localhost:8000`. No tiene ningún mecanismo de autenticación de usuario.

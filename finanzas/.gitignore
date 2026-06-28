@@ -1,0 +1,12 @@
+.venv/
+data/
+__pycache__/
+*.pyc
+*.pyo
+.env
+token.json
+credentials.json
+*.db
+*.db-shm
+*.db-wal
+.DS_Store
